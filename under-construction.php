@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Under Construction
  * Plugin URI: https://github.com/mtwsnc/under-construction-plugin
- * Description: A under construction plugin for WordPress which allows you to set your site to be under construction by using HTML or using a page on your website
+ * Description: An under construction plugin for WordPress which allows you to set your site to be under construction by using HTML or using a page on your website
  * Version: 1.0.0
  * Author: mtwsnc
  * License: GPL v2 or later
@@ -59,10 +59,46 @@ class Under_Construction {
      * Register plugin settings
      */
     public function register_settings() {
-        register_setting('under_construction_settings', 'uc_enabled');
-        register_setting('under_construction_settings', 'uc_mode');
-        register_setting('under_construction_settings', 'uc_html_content');
-        register_setting('under_construction_settings', 'uc_page_id');
+        register_setting('under_construction_settings', 'uc_enabled', array(
+            'sanitize_callback' => array($this, 'sanitize_checkbox')
+        ));
+        register_setting('under_construction_settings', 'uc_mode', array(
+            'sanitize_callback' => array($this, 'sanitize_mode')
+        ));
+        register_setting('under_construction_settings', 'uc_html_content', array(
+            'sanitize_callback' => array($this, 'sanitize_html_content')
+        ));
+        register_setting('under_construction_settings', 'uc_page_id', array(
+            'sanitize_callback' => 'absint'
+        ));
+    }
+    
+    /**
+     * Sanitize checkbox value
+     */
+    public function sanitize_checkbox($value) {
+        return ($value === '1') ? '1' : '0';
+    }
+    
+    /**
+     * Sanitize mode selection
+     */
+    public function sanitize_mode($value) {
+        $allowed_modes = array('html', 'page');
+        return in_array($value, $allowed_modes, true) ? $value : 'html';
+    }
+    
+    /**
+     * Sanitize HTML content
+     */
+    public function sanitize_html_content($value) {
+        // Allow administrators to save HTML/CSS/JS for the under construction page
+        // This is intentional as it's admin-only and for displaying to non-authenticated users
+        if (!current_user_can('unfiltered_html')) {
+            // For users without unfiltered_html capability, strip all tags
+            return wp_kses_post($value);
+        }
+        return $value;
     }
     
     /**
@@ -241,6 +277,8 @@ class Under_Construction {
         nocache_headers();
         
         // Output the HTML content
+        // Note: This content is administrator-controlled and sanitized on save
+        // Only users with 'unfiltered_html' capability can save unrestricted HTML
         echo $html_content;
         exit;
     }
@@ -315,7 +353,7 @@ class Under_Construction {
     <div class="container">
         <div class="icon">🚧</div>
         <h1>Under Construction</h1>
-        <p>We\'re working hard to bring you something amazing. Please check back soon!</p>
+        <p>We&rsquo;re working hard to bring you something amazing. Please check back soon!</p>
     </div>
 </body>
 </html>';
