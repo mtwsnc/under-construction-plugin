@@ -4,7 +4,8 @@
  * Plugin URI: https://github.com/mtwsnc/under-construction-plugin
  * Description: An under construction plugin for WordPress which allows you to set your site to be under construction by using HTML or using a page on your website
  * Version: 1.0.0
- * Author: mtwsnc
+ * Author: Abdur-Rahman Bilal
+ * Author URI: https://github.com/aramb-dev
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: under-construction
